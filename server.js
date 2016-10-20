@@ -54,7 +54,7 @@ server.get('/notify',baseAuth, function (req, res, next) {
 //server.use();
 server.use(signalR.createListener());
 server.use(express.static(__dirname));
-server.listen(8089);
+server.listen(80);
   
 signalR.on('CONNECTED',function(){
     console.log('connected');
