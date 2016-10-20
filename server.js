@@ -54,7 +54,10 @@ server.get('/notify',baseAuth, function (req, res, next) {
 //server.use();
 server.use(signalR.createListener());
 server.use(express.static(__dirname));
-server.listen(80);
+server.listen(process.env.PORT || 8080, function () {
+    var port = server.address().port;
+    console.log("App now running on port", port);
+  });
   
 signalR.on('CONNECTED',function(){
     console.log('connected');
