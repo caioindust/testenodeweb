@@ -2,38 +2,6 @@
 var SignalRJS = require('signalrjs');
 var baseAuth = require('./middleware/baseAuthentication');
 var path = require('path');
-var mongoose = require('mongoose');
-//SET MONGOLAB_URI="mongodb://tpn:tpn123@ds063536.mlab.com:63536/triggerpanelnotify"
-// Create a schema
-var UserSchema = new mongoose.Schema({
-  id: Number,  
-  username: String,
-  password: String,
-  active: Boolean
-});
-// Create a model based on the schema
-var User = mongoose.model('User', UserSchema);
-
-// Connect to MongoDB and create/use database called todoAppTest
-mongoose.connect(process.env.MONGOLAB_URI,{ server: { auto_reconnect: true }});
-//mongoose.connect("mongodb://tpn:tpn123@ds063536.mlab.com:63536/triggerpanelnotify",{ server: { auto_reconnect: true }});
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-  // we're connected!
-  console.log('connection succesful');	
-	// Create a todo in memory
-	var user = new User({id: 1, username: 'caio', password: 'osmose123', active: true});
-	// Save it to database
-	user.save(function(err){
-	  if(err)
-		console.log(err);
-	  else
-		console.log(todo);
-	});
-
-});
-
 
 var signalR = SignalRJS();
 var server = express();
