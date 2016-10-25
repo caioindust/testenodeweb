@@ -20,22 +20,29 @@ module.exports = function(req, res, next) {
 			next();
 		}*/	
 		if (user !== undefined){
-			userDB.findOne({ username: user['name'] }, function(err, u) {
-				if (err) {
+				
+			var query = userDB.findOne({ username: user['name'], active: true });
+
+			// selecting the `name` and `occupation` fields
+			query.select('password');
+
+			// execute the query at a later time
+			query.exec(function (err, u) {
+				if (err || u==null) {				  
 					res.header('WWW-Authenticate', 'Basic realm="Admin Area"');					
 					res.status(401).send();
+				}else{				
+					if(user['pass'] == u.password)
+					{
+						req.user = user;			
+						next();
+					}else{
+						res.header('WWW-Authenticate', 'Basic realm="Admin Area"');					
+						res.status(401).send();
+					}
 				}
-				console.dir(user['pass'] , u.password);
-				if(user['pass'] == u.password)
-				{
-					req.user = user;			
-					next();
-				}else{
-					res.header('WWW-Authenticate', 'Basic realm="Admin Area"');					
-					res.status(401).send();
-				}
-				//console.dir(u.password);
-			});
+			})
+			
 		}else{
 			res.header('WWW-Authenticate', 'Basic realm="Admin Area"');					
 			res.status(401).send();
