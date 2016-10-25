@@ -1,3 +1,4 @@
+var userDB = require('./../models/Users');
 module.exports = function(req, res, next) {
 	var baseAuth = req.get("Authorization");
 	if(baseAuth!=undefined)
@@ -14,14 +15,33 @@ module.exports = function(req, res, next) {
 		}
 		
 		req.session = null;	
-		if (user !== undefined && user['name'] === 'admin' && user['pass'] === '123456') {			
+		/*if (user !== undefined && user['name'] === 'admin' && user['pass'] === '123456') {			
 			req.user = user;			
 			next();
-		}			
-	}
-	
-	if(req.user==undefined){
+		}*/	
+		if (user !== undefined){
+			userDB.findOne({ username: user['name'] }, function(err, u) {
+				if (err) {
+					res.header('WWW-Authenticate', 'Basic realm="Admin Area"');					
+					res.status(401).send();
+				}
+				console.dir(user['pass'] , u.password);
+				if(user['pass'] == u.password)
+				{
+					req.user = user;			
+					next();
+				}else{
+					res.header('WWW-Authenticate', 'Basic realm="Admin Area"');					
+					res.status(401).send();
+				}
+				//console.dir(u.password);
+			});
+		}else{
+			res.header('WWW-Authenticate', 'Basic realm="Admin Area"');					
+			res.status(401).send();
+		}	
+	}else{
 		res.header('WWW-Authenticate', 'Basic realm="Admin Area"');					
 		res.status(401).send();
-	}
+	}	
 }

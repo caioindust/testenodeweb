@@ -2,6 +2,17 @@
 var SignalRJS = require('signalrjs');
 var baseAuth = require('./middleware/baseAuthentication');
 var path = require('path');
+var mongoose = require('mongoose');
+var userDB = require('./models/Users');
+
+var db = mongoose.connection;
+db.on('error', function(err) { console.log(err) });
+db.once('open', function() {
+  console.log('connection mongodb succesful');
+});
+console.log(process.env.MONGOLAB_URI);
+//mongoose.connect(process.env.MONGOLAB_URI,{ server: { auto_reconnect: true }});
+mongoose.connect('mongodb://localhost/test',{ server: { auto_reconnect: true }});
 
 var signalR = SignalRJS();
 var server = express();
