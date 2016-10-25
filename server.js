@@ -16,7 +16,6 @@ var allowCrossDomain = function(req, res, next) {
 }
 
 server.use(allowCrossDomain);
-
 server.use( express.static(path.join(__dirname, "download")));
 
 server.get('/adm',baseAuth, function(req, res) {
@@ -30,22 +29,22 @@ server.get('/adm',baseAuth, function(req, res) {
 // });
 
 server.get('/cafe',baseAuth, function (req, res, next) {	
-	signalR.broadcast({action:"notify", notify:{title:'Café', content: "O café chegou!!!", icon:"coffee" }});	
+	signalR.broadcast({"action":"notify", "notify":{"title":"Café", "content": "O café chegou!!!", "icon":"coffee" }});	
 	res.json({error:false, msg: "O café chegou!!!", status:"OK"});	
 });
 
 server.get('/sol',baseAuth, function (req, res, next) {
-	signalR.broadcast({action:"notify", notify:{title:'SOL', content: "O \"SOL\" chegou!!!", icon:"sun" }});		
+	signalR.broadcast({"action":"notify", "notify":{"title":"SOL", "content": "O 'SOL' chegou!!!", "icon":"sun" }});		
 	res.json({error:false, msg: "Olha o \"SOL\"", status:"OK"});	
 });
 
 server.get('/discoVoador',baseAuth, function (req, res, next) {
-	signalR.broadcast({action:"notify", notify:{title:'Disco', content: "Já chegou o disco voador!!!", icon:"ufo" }});		
+	signalR.broadcast({"action":"notify", "notify":{"title":"Disco", "content": "Já chegou o disco voador!!!", "icon":"ufo" }});		
 	res.json({error:false, msg: "Já chegou o disco voador!!!", status:"OK"});	
 });
 
 server.get('/notify',baseAuth, function (req, res, next) {		
-	signalR.broadcast({action:"notify", notify:req.query});	
+	signalR.broadcast({"action":"notify", notify:req.query});	
 	res.json({error:false, msg: req.query.content, status:"OK"});	
 });
 
@@ -59,9 +58,6 @@ var listen = server.listen(process.env.PORT || 18889, function () {
   
 signalR.on('CONNECTED',function(){
     console.log('connected');
-    // setInterval(function () {
-        // signalR.broadcast({time:new Date()});
-    // },1000);
 });
 
  process.on('uncaughtException', function(err) {
