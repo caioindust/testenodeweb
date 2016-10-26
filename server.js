@@ -1,18 +1,25 @@
 ﻿var express = require('express');
 var SignalRJS = require('signalrjs');
-var baseAuth = require('./middleware/baseAuthentication');
 var path = require('path');
 var mongoose = require('mongoose');
 var userDB = require('./models/Users');
+
+var bodyParser = require("body-parser");//https://www.npmjs.com/package/body-parser
+var cookieParser = require('cookie-parser');//https://www.npmjs.com/package/cookie-parser
+var cookieSession = require('cookie-session');//https://www.npmjs.com/package/cookie-session
+var passport = require('passport');
+var flash = require('connect-flash');
 
 var db = mongoose.connection;
 db.on('error', function(err) { console.log(err) });
 db.once('open', function() {
   console.log('connection mongodb succesful');
 });
-console.log(process.env.MONGOLAB_URI);
+
 mongoose.connect(process.env.MONGOLAB_URI,{ server: { auto_reconnect: true }});
 //mongoose.connect('mongodb://localhost/test',{ server: { auto_reconnect: true }});
+
+require('./config/passport')(passport); // pass passport for configuration
 
 var signalR = SignalRJS();
 var server = express();
@@ -25,43 +32,33 @@ var allowCrossDomain = function(req, res, next) {
 
     next();
 }
-
 server.use(allowCrossDomain);
-server.use( express.static(path.join(__dirname, "download")));
 
-server.get('/adm',baseAuth, function(req, res) {
-	res.sendFile(path.join(__dirname , 'alerttriggers.html'));
-});
-
-// server.get('/logout',baseAuth, function(req, res) {
-//     delete req.headers.authorization;
-//     res.set('WWW-Authenticate', 'Basic realm=Authorization Required');
-// 	res.redirect('/');
-// });
-
-server.get('/cafe',baseAuth, function (req, res, next) {	
-	signalR.broadcast({"action":"notify", "notify":{"title":"Café", "content": "O café chegou!!!", "icon":"coffee" }});	
-	res.json({error:false, msg: "O café chegou!!!", status:"OK"});	
-});
-
-server.get('/sol',baseAuth, function (req, res, next) {
-	signalR.broadcast({"action":"notify", "notify":{"title":"SOL", "content": "O 'SOL' chegou!!!", "icon":"sun" }});		
-	res.json({error:false, msg: "Olha o \"SOL\"", status:"OK"});	
-});
-
-server.get('/discoVoador',baseAuth, function (req, res, next) {
-	signalR.broadcast({"action":"notify", "notify":{"title":"Disco", "content": "Já chegou o disco voador!!!", "icon":"ufo" }});		
-	res.json({error:false, msg: "Já chegou o disco voador!!!", status:"OK"});	
-});
-
-server.get('/notify',baseAuth, function (req, res, next) {		
-	signalR.broadcast({"action":"notify", notify:req.query});	
-	res.json({error:false, msg: req.query.content, status:"OK"});	
-});
-
-//server.use();
 server.use(signalR.createListener());
-server.use(express.static(__dirname));
+
+server.use(cookieSession({
+  name: 'session',  
+  keys: [
+	'HhO0VGUuWAKqvwlMWryK',
+	'74WXlMvCV9mFoo9agQUc',
+	'n4dwdiWwkpt4XMFgcB0I',
+	'X6sp0rcn7HmoGFCePY3R',
+	'yWdGy0eItai967eoNI51'
+  ]
+}));
+
+server.use(bodyParser.urlencoded({'extended':'true'}));            // parse application/x-www-form-urlencoded
+server.use(bodyParser.json());                                     // parse application/json
+server.use(bodyParser.json({ type: 'application/vnd.api+json' })); // parse application/vnd.api+json as json
+
+server.use(cookieParser('XPTO1'));
+server.use(passport.initialize());
+server.use(passport.session()); // persistent login sessions
+server.use(flash()); // use connect-flash for flash messages stored in session
+server.set('view engine', 'ejs'); // set up ejs for templating
+
+require('./config/routes.js')(server, express, signalR, passport, __dirname);
+
 var listen = server.listen(process.env.PORT || 18889, function () {
 	var port = listen.address().port;
 	console.log("App now running on port", port);
