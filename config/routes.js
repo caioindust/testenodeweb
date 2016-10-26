@@ -1,4 +1,4 @@
-var path = require('path');
+ï»¿var path = require('path');
 
 module.exports = function(app, express, signalR, passport, dirname) {
 
@@ -17,15 +17,15 @@ module.exports = function(app, express, signalR, passport, dirname) {
 	app.get('/adm',isLoggedIn, function(req, res) {
 		res.render('adm.ejs', {
 			models: {
-				title: 'Administração',
+				title: 'AdministraÃ§Ã£o',
 				user : req.user
 			}
         });
 	});
 
 	app.get('/cafe',isLoggedIn, function (req, res, next) {	
-		signalR.broadcast({"action":"notify", "notify":{"title":"Café", "content": "O café chegou!!!", "icon":"coffee" }});	
-		res.json({error:false, msg: "O café chegou!!!", status:"OK"});	
+		signalR.broadcast({"action":"notify", "notify":{"title":"CafÃ©", "content": "O cafÃ© chegou!!!", "icon":"coffee" }});	
+		res.json({error:false, msg: "O cafÃ© chegou!!!", status:"OK"});	
 	});
 
 	app.get('/sol',isLoggedIn, function (req, res, next) {
@@ -34,8 +34,8 @@ module.exports = function(app, express, signalR, passport, dirname) {
 	});
 
 	app.get('/discoVoador',isLoggedIn, function (req, res, next) {
-		signalR.broadcast({"action":"notify", "notify":{"title":"Disco", "content": "Já chegou o disco voador!!!", "icon":"ufo" }});		
-		res.json({error:false, msg: "Já chegou o disco voador!!!", status:"OK"});	
+		signalR.broadcast({"action":"notify", "notify":{"title":"Disco", "content": "JÃ¡ chegou o disco voador!!!", "icon":"ufo" }});		
+		res.json({error:false, msg: "JÃ¡ chegou o disco voador!!!", status:"OK"});	
 	});
 
 	app.get('/notify',isLoggedIn, function (req, res, next) {		
