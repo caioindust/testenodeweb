@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+	<% include ./partials/head %>
+</head>
+
+<body>
+
+	<!-- Navigation -->
+	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+		<div class="container">
+			<% include ./partials/menu %>
+		</div>
+	<!-- /.container -->
+	</nav>
+
+	<div class="container">
+
+		<!-- Jumbotron Header -->
+		<header class="jumbotron hero-spacer">
+			<h1>All steps are taken</h1>
+  			<p>Manage all steps of the man aka Falastrao!</p> 
+		</header>
+		<% if (models.user !=null){ %>
+		<hr>
+		<% include ./partials/events %>
+		<% } %>
+	</div>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+</body>
+
+</html>
