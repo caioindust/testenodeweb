@@ -241,7 +241,11 @@ function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
         if (req.user.apps.indexOf(1) >= 0) {
             return next();
+        } else {
+            req.logout();
+            req.flash('loginMessage', 'Access denied!');
         }
+
     }
 
     res.redirect('/notificador/Login');
@@ -252,8 +256,10 @@ function isLoggedInFalastrao(req, res, next) {
     if (req.isAuthenticated()) {
         if (req.user.apps.indexOf(2) >= 0) {
             return next();
+        } else {
+            req.logout();
+            req.flash('loginMessage', 'Access denied!');
         }
     }
-
     res.redirect('/falastrao/Login');
 }
