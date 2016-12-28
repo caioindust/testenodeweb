@@ -2,14 +2,14 @@
 <html lang="pt-br">
 
 <head>
-	<% include ./partials/head %>
+	<%- include("."+path+"/partials/head") %>
 </head>
 <body>
 
 	<!-- Navigation -->
 	<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
 		<div class="container">
-			<% include ./partials/menu %>
+			<%- include("."+path+"/partials/menu") %>
 		</div>
 		<!-- /.container -->
 	</nav>
@@ -25,7 +25,7 @@
 			<% } %>
 
 			<!-- LOGIN FORM -->
-			<form action="/login" method="post">
+			<form action="./login" method="post">
 				<div class="form-group">
 					<label>User</label>
 					<input type="text" class="form-control" name="username">
@@ -35,7 +35,7 @@
 					<input type="password" class="form-control" name="password">
 				</div>
 
-				<button type="submit" class="btn btn-warning btn-lg">Sign in</button>
+				<button type="submit" class="btn btn-warning btn-lg" style="float: right;">Sign in</button>
 			</form>
 
 		</div>

@@ -20,8 +20,18 @@ module.exports = function(app, express, signalR, passport, dirname) {
     });
 
     /*Metodos notify */
-    app.get('/adm', isLoggedIn, function(req, res) {
-        res.render('adm.ejs', {
+
+    app.get('/notificador', function(req, res) {
+        res.render('notificador/index.ejs', {
+            models: {
+                title: 'Home',
+                user: req.user
+            }
+        });
+    });
+
+    app.get('/notificador/adm', isLoggedIn, function(req, res) {
+        res.render('notificador/adm.ejs', {
             models: {
                 title: 'Administração',
                 user: req.user
@@ -29,30 +39,54 @@ module.exports = function(app, express, signalR, passport, dirname) {
         });
     });
 
-    app.get('/cafe', isLoggedIn, function(req, res, next) {
+    app.get('/notificador/cafe', isLoggedIn, function(req, res, next) {
         signalR.broadcast({ "action": "notify", "notify": { "title": "Café", "content": "O café chegou!!!", "icon": "coffee" } });
         res.json({ error: false, msg: "O café chegou!!!", status: "OK" });
     });
 
-    app.get('/sol', isLoggedIn, function(req, res, next) {
+    app.get('/notificador/sol', isLoggedIn, function(req, res, next) {
         signalR.broadcast({ "action": "notify", "notify": { "title": "SOL", "content": "O 'SOL' chegou!!!", "icon": "sun" } });
         res.json({ error: false, msg: "Olha o \"SOL\"", status: "OK" });
     });
 
-    app.get('/discoVoador', isLoggedIn, function(req, res, next) {
+    app.get('/notificador/discoVoador', isLoggedIn, function(req, res, next) {
         signalR.broadcast({ "action": "notify", "notify": { "title": "Disco", "content": "Já chegou o disco voador!!!", "icon": "ufo" } });
         res.json({ error: false, msg: "Já chegou o disco voador!!!", status: "OK" });
     });
 
-    app.get('/notify', isLoggedIn, function(req, res, next) {
+    app.get('/notificador/notify', isLoggedIn, function(req, res, next) {
         signalR.broadcast({ "action": "notify", notify: req.query });
         res.json({ error: false, msg: req.query.content, status: "OK" });
     });
 
-    // LOGOUT ==============================
-    app.get('/logout', isLoggedIn, function(req, res) {
+    // =============================================================================
+    // AUTHENTICATE (FIRST LOGIN) ==================================================
+    // =============================================================================
+    ///https://github.com/scotch-io/easy-node-authentication/blob/master/app/routes.js
+    // locally --------------------------------
+    // LOGIN ===============================
+    // show the login form
+    app.get('/notificador/login', function(req, res) {
+        res.render('login.ejs', {
+            message: req.flash('loginMessage'),
+            path: "/notificador",
+            models: {
+                title: 'Login',
+                user: req.user
+            }
+        });
+    });
+
+    // process the login form
+    app.post('/notificador/login', passport.authenticate('local-login', {
+        successRedirect: '/notificador/adm', // redirect to the secure profile section
+        failureRedirect: '/notificador/login', // redirect back to the signup page if there is an error
+        failureFlash: true // allow flash messages
+    }));
+
+    app.get('/notificador/logout', isLoggedIn, function(req, res) {
         req.logout();
-        res.redirect('/');
+        res.redirect('/notificador');
     });
     /*Fim - Metodos notify */
 
@@ -62,21 +96,6 @@ module.exports = function(app, express, signalR, passport, dirname) {
         res.render('falastrao/index.ejs', {
             models: {
                 title: 'Home - Falastrão',
-                user: req.user
-            }
-        });
-    });
-
-    app.get('/falastrao/logout', isLoggedInFalastrao, function(req, res) {
-        req.logout();
-        res.redirect('/falastrao');
-    });
-
-    app.get('/falastrao/login', function(req, res) {
-        res.render('falastrao/login.ejs', {
-            message: req.flash('loginMessage'),
-            models: {
-                title: 'Login',
                 user: req.user
             }
         });
@@ -192,23 +211,10 @@ module.exports = function(app, express, signalR, passport, dirname) {
         });
     });
 
-    app.post('/falastrao/login', passport.authenticate('local-login', {
-        successRedirect: '/falastrao', // redirect to the secure profile section
-        failureRedirect: '/falastrao/login', // redirect back to the signup page if there is an error
-        failureFlash: true // allow flash messages
-    }));
-    /*Fim - Metodos Falastrão */
-
-    // =============================================================================
-    // AUTHENTICATE (FIRST LOGIN) ==================================================
-    // =============================================================================
-    ///https://github.com/scotch-io/easy-node-authentication/blob/master/app/routes.js
-    // locally --------------------------------
-    // LOGIN ===============================
-    // show the login form
-    app.get('/login', function(req, res) {
+    app.get('/falastrao/login', function(req, res) {
         res.render('login.ejs', {
             message: req.flash('loginMessage'),
+            path: "/falastrao",
             models: {
                 title: 'Login',
                 user: req.user
@@ -216,100 +222,19 @@ module.exports = function(app, express, signalR, passport, dirname) {
         });
     });
 
-    // process the login form
-    app.post('/login', passport.authenticate('local-login', {
-        successRedirect: '/adm', // redirect to the secure profile section
-        failureRedirect: '/login', // redirect back to the signup page if there is an error
+    app.post('/falastrao/login', passport.authenticate('local-login', {
+        successRedirect: '/falastrao', // redirect to the secure profile section
+        failureRedirect: '/falastrao/login', // redirect back to the signup page if there is an error
         failureFlash: true // allow flash messages
     }));
 
-    /*// SIGNUP =================================
-    // show the signup form
-    app.get('/signup', function(req, res) {
-        res.render('signup.ejs', { message: req.flash('signupMessage') });
+    app.get('/falastrao/logout', isLoggedInFalastrao, function(req, res) {
+        req.logout();
+        res.redirect('/falastrao');
     });
-
-    // process the signup form
-    app.post('/signup', passport.authenticate('local-signup', {
-        successRedirect : '/profile', // redirect to the secure profile section
-        failureRedirect : '/signup', // redirect back to the signup page if there is an error
-        failureFlash : true // allow flash messages
-    }));*/
-
-    // =============================================================================
-    // AUTHORIZE (ALREADY LOGGED IN / CONNECTING OTHER SOCIAL ACCOUNT) =============
-    // =============================================================================
-
-    // locally --------------------------------
-    app.get('/connect/local', function(req, res) {
-        res.render('connect-local.ejs', { message: req.flash('loginMessage') });
-    });
-    app.post('/connect/local', passport.authenticate('local-signup', {
-        successRedirect: '/profile', // redirect to the secure profile section
-        failureRedirect: '/connect/local', // redirect back to the signup page if there is an error
-        failureFlash: true // allow flash messages
-    }));
+    /*Fim - Metodos Falastrão */
 
 };
-
-// function getChartData() {
-//     var defer = q.defer();
-//     FalastraoEventsDB.getChartData(function(err, result) {
-//         if (err) {
-//             defer.reject(err);
-//         } else {
-//             result = result.map(function(obj) {
-//                 return {
-//                     "event": obj._id.event,
-//                     //"year": obj._id.year,
-//                     //"month": obj._id.month,
-//                     //"day": obj._id.day,
-//                     "hour": obj._id.hour,
-//                     "count": obj.count
-//                 };
-//             });
-//             var min = result.min("hour").hour;
-//             var max = result.max("hour").hour;
-//             var data = result.groupBy('event');
-//             defer.resolve({
-//                 type: "A",
-//                 data: data,
-//                 others: {
-//                     hours: {
-//                         min: min,
-//                         max: max,
-//                         range: Number.range(min, max).toArray()
-//                     }
-//                 }
-//             });
-//         }
-//     });
-//     return defer.promise;
-// }
-// function getLastStatusEvents() {
-//     var defer = q.defer();
-
-//     var falastraoEvent = new FalastraoEventsDB({});
-//     falastraoEvent.getLastStatusEvents(
-//         function(err, result) {
-//             if (err) {
-//                 defer.reject(err);
-//             } else {
-//                 defer.resolve({
-//                     type: "LastStatusEvents",
-//                     data: result
-//                 });
-//             }
-//         }
-//     );
-//     return defer.promise;
-// }
-// q.all([getChartData(), getLastStatusEvents()])
-//     .then(function(result) {
-//         res.json({ error: false, results: result });
-//     }).catch(function() {
-//         res.json({ error: true });
-//     });
 
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
@@ -319,7 +244,7 @@ function isLoggedIn(req, res, next) {
         }
     }
 
-    res.redirect('/Login');
+    res.redirect('/notificador/Login');
 }
 
 // route middleware to ensure user is logged in
@@ -332,20 +257,3 @@ function isLoggedInFalastrao(req, res, next) {
 
     res.redirect('/falastrao/Login');
 }
-
-/*function sendStatusEventsFalastrao(callback) {
-    falastraoEvent.aggregate(
-        [
-            { $sort: { event: 1, date: 1 } },
-            {
-                $group: {
-                    _id: "$event",
-                    running: { $last: "$start" }
-                }
-            }
-        ],
-        function(err, result) {
-            callback(err, result);
-        }
-    );
-}*/
