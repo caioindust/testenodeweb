@@ -142,36 +142,52 @@ module.exports = function(app, express, signalR, passport, dirname) {
             if (err) {
                 process.nextTick(function() {
                     res.json({
-                        error: false
+                        error: true
                     });
                 });
             } else {
-                result = result.map(function(obj) {
-                    return {
-                        "event": obj._id.event,
-                        //"year": obj._id.year,
-                        //"month": obj._id.month,
-                        //"day": obj._id.day,
-                        "hour": obj._id.hour,
-                        "count": obj.count
-                    };
-                });
-                var min = result.min("hour").hour;
-                var max = result.max("hour").hour;
-                var data = result.groupBy('event');
-                process.nextTick(function() {
-                    res.json({
-                        error: false,
-                        data: data,
-                        others: {
-                            hours: {
-                                min: min,
-                                max: max,
-                                range: Number.range(min, max).toArray()
-                            }
-                        }
+                if (result.length > 0) {
+                    result = result.map(function(obj) {
+                        return {
+                            "event": obj._id.event,
+                            //"year": obj._id.year,
+                            //"month": obj._id.month,
+                            //"day": obj._id.day,
+                            "hour": obj._id.hour,
+                            "count": obj.count
+                        };
                     });
-                });
+                    var min = result.min("hour").hour;
+                    var max = result.max("hour").hour;
+                    var data = result.groupBy('event');
+                    process.nextTick(function() {
+                        res.json({
+                            error: false,
+                            data: data,
+                            others: {
+                                hours: {
+                                    min: min,
+                                    max: max,
+                                    range: Number.range(min, max).toArray()
+                                }
+                            }
+                        });
+                    });
+                } else {
+                    process.nextTick(function() {
+                        res.json({
+                            error: false,
+                            data: [],
+                            others: {
+                                hours: {
+                                    min: 0,
+                                    max: 0,
+                                    range: Number.range(0, 0).toArray()
+                                }
+                            }
+                        });
+                    });
+                }
             }
         });
     });
