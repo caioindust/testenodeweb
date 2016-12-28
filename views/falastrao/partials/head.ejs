@@ -13,13 +13,61 @@
 	body {
 		padding-top: 70px;
 	}
-	.thumbnail 
+
+	.thumbnail ,
+	.thumbnail .caption
 	{
-		min-height:207px;
+		min-height:157px;
+	}
+
+	.thumbnail .caption > p {
+		height: 20px;
+	}
+
+	.thumbnail h3 {    
+		margin-top: 0;
+	}
+
+	.thumbnail .badge {
+		float: right;
 	}
 	
 	.btn
 	{	
+		float: right;
+		bottom: -36px;
 		min-width: 70px;
+		position: relative;
 	}
+
+	[data-running="idle"] {
+		display: none;
+	}
+
+	[data-running="false"] .fa-play{
+		display: inline-block;
+	}
+
+	[data-running="false"] .fa-stop{
+		display: none;
+	}
+
+	[data-running="true"] .fa-play{
+		display: none;
+	}
+
+	[data-running="true"] .fa-stop{
+		display: inline-block;
+	}
+
+	.jumbotron {
+		padding-bottom: 5px;
+		padding-top: 5px;
+	}
+
+	canvas{
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+    }
 </style>

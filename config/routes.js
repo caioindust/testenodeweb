@@ -1,10 +1,14 @@
 ﻿var path = require('path');
 var FalastraoEventsDB = require('./../models/FalastraoEvents');
+var Sugar = require('sugar');
+var q = require('q');
+Sugar.extend();
 
 module.exports = function(app, express, signalR, passport, dirname) {
 
     app.use(express.static(dirname));
     app.use(express.static(path.join(dirname, "download")));
+    app.use(express.static(path.join(dirname, "scripts")));
 
     app.get('/', function(req, res) {
         res.render('index.ejs', {
@@ -54,7 +58,7 @@ module.exports = function(app, express, signalR, passport, dirname) {
 
     /*Metodos Falastrão */
 
-    app.get('/falastrao', isLoggedInFalatrao, function(req, res) {
+    app.get('/falastrao', isLoggedInFalastrao, function(req, res) {
         res.render('falastrao/index.ejs', {
             models: {
                 title: 'Home - Falastrão',
@@ -63,7 +67,7 @@ module.exports = function(app, express, signalR, passport, dirname) {
         });
     });
 
-    app.get('/falastrao/logout', isLoggedInFalatrao, function(req, res) {
+    app.get('/falastrao/logout', isLoggedInFalastrao, function(req, res) {
         req.logout();
         res.redirect('/falastrao');
     });
@@ -78,14 +82,16 @@ module.exports = function(app, express, signalR, passport, dirname) {
         });
     });
 
-    app.get('/falastrao/addevent/:event/:start', isLoggedInFalatrao, function(req, res) {
+    app.get('/falastrao/addevent/:event/:start', isLoggedInFalastrao, function(req, res) {
 
         var start = req.params.start == "true" || req.params.start == "1";
 
         var falastraoEvent = new FalastraoEventsDB({
             event: req.params.event,
             start: start,
-            _user: req.user
+            _user: req.user,
+            date: new Date(),
+            timezoneOffset: new Date().getTimezoneOffset() * 60 * 1000
         });
 
         process.nextTick(function() {
@@ -96,6 +102,7 @@ module.exports = function(app, express, signalR, passport, dirname) {
                         event: falastraoEvent.event,
                         start: !start,
                         date: falastraoEvent.start ? falastraoEvent.date.getTime() - 1000 : last.date.getTime() + 1000,
+                        timezoneOffset: new Date().getTimezoneOffset() * 60 * 1000,
                         _user: req.user
                     });
                     autoFalastraoEvent.save();
@@ -113,9 +120,59 @@ module.exports = function(app, express, signalR, passport, dirname) {
                     if (err1) {
                         res.json({ error: true, err: err1, obj: { event: req.params.event, start: req.params.start } });
                     }
+
+                    falastraoEvent.getLastStatusEvents(
+                        function(err, result) {
+                            if (err) {
+
+                            } else {
+                                signalR.broadcast({ "action": "falastrao", "events": result });
+                            }
+                        }
+                    );
+
                     res.json({ error: false, obj: { event: req.params.event, start: req.params.start } });
                 });
             });
+        });
+    });
+
+    app.get('/falastrao/chart/database', isLoggedInFalastrao, function(req, res) {
+        FalastraoEventsDB.getChartData(function(err, result) {
+            if (err) {
+                process.nextTick(function() {
+                    res.json({
+                        error: false
+                    });
+                });
+            } else {
+                result = result.map(function(obj) {
+                    return {
+                        "event": obj._id.event,
+                        //"year": obj._id.year,
+                        //"month": obj._id.month,
+                        //"day": obj._id.day,
+                        "hour": obj._id.hour,
+                        "count": obj.count
+                    };
+                });
+                var min = result.min("hour").hour;
+                var max = result.max("hour").hour;
+                var data = result.groupBy('event');
+                process.nextTick(function() {
+                    res.json({
+                        error: false,
+                        data: data,
+                        others: {
+                            hours: {
+                                min: min,
+                                max: max,
+                                range: Number.range(min, max).toArray()
+                            }
+                        }
+                    });
+                });
+            }
         });
     });
 
@@ -179,6 +236,65 @@ module.exports = function(app, express, signalR, passport, dirname) {
 
 };
 
+// function getChartData() {
+//     var defer = q.defer();
+//     FalastraoEventsDB.getChartData(function(err, result) {
+//         if (err) {
+//             defer.reject(err);
+//         } else {
+//             result = result.map(function(obj) {
+//                 return {
+//                     "event": obj._id.event,
+//                     //"year": obj._id.year,
+//                     //"month": obj._id.month,
+//                     //"day": obj._id.day,
+//                     "hour": obj._id.hour,
+//                     "count": obj.count
+//                 };
+//             });
+//             var min = result.min("hour").hour;
+//             var max = result.max("hour").hour;
+//             var data = result.groupBy('event');
+//             defer.resolve({
+//                 type: "A",
+//                 data: data,
+//                 others: {
+//                     hours: {
+//                         min: min,
+//                         max: max,
+//                         range: Number.range(min, max).toArray()
+//                     }
+//                 }
+//             });
+//         }
+//     });
+//     return defer.promise;
+// }
+// function getLastStatusEvents() {
+//     var defer = q.defer();
+
+//     var falastraoEvent = new FalastraoEventsDB({});
+//     falastraoEvent.getLastStatusEvents(
+//         function(err, result) {
+//             if (err) {
+//                 defer.reject(err);
+//             } else {
+//                 defer.resolve({
+//                     type: "LastStatusEvents",
+//                     data: result
+//                 });
+//             }
+//         }
+//     );
+//     return defer.promise;
+// }
+// q.all([getChartData(), getLastStatusEvents()])
+//     .then(function(result) {
+//         res.json({ error: false, results: result });
+//     }).catch(function() {
+//         res.json({ error: true });
+//     });
+
 // route middleware to ensure user is logged in
 function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
@@ -191,7 +307,7 @@ function isLoggedIn(req, res, next) {
 }
 
 // route middleware to ensure user is logged in
-function isLoggedInFalatrao(req, res, next) {
+function isLoggedInFalastrao(req, res, next) {
     if (req.isAuthenticated()) {
         if (req.user.apps.indexOf(2) >= 0) {
             return next();
@@ -200,3 +316,20 @@ function isLoggedInFalatrao(req, res, next) {
 
     res.redirect('/falastrao/Login');
 }
+
+/*function sendStatusEventsFalastrao(callback) {
+    falastraoEvent.aggregate(
+        [
+            { $sort: { event: 1, date: 1 } },
+            {
+                $group: {
+                    _id: "$event",
+                    running: { $last: "$start" }
+                }
+            }
+        ],
+        function(err, result) {
+            callback(err, result);
+        }
+    );
+}*/

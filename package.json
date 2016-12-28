@@ -1,31 +1,32 @@
 {
-  "name": "signalr_server",
-  "version": "1.0.0",
-  "description": "Teste com signalR",
-  "main": "server.js",
-  "scripts": {
-    "test": "gulp test",
-    "start": "node server.js"
-  },
-  "engines": {
-    "node": "4.6.0"
-  },
-  "keywords": [
-    "signalR"
-  ],
-  "author": "Caio Humberto",
-  "license": "ISC",
-  "dependencies": {
-    "bcrypt-nodejs": "0.0.3",
-    "body-parser": "^1.15.2",
-    "connect-flash": "^0.1.1",
-    "cookie-parser": "^1.4.3",
-    "cookie-session": "^2.0.0-alpha.1",
-    "ejs": "^2.5.2",
-    "express": "^4.14.0",
-    "mongoose": "^4.3.4",
-    "passport": "^0.3.2",
-    "passport-local": "^1.0.0",
-    "signalrjs": "^0.2.2"
-  }
+    "name": "signalr_server",
+    "version": "1.0.0",
+    "description": "Teste com signalR",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "engines": {
+        "node": "4.6.0"
+    },
+    "keywords": [
+        "signalR"
+    ],
+    "author": "Caio Humberto",
+    "license": "ISC",
+    "dependencies": {
+        "bcrypt-nodejs": "0.0.3",
+        "body-parser": "^1.15.2",
+        "connect-flash": "^0.1.1",
+        "cookie-parser": "^1.4.3",
+        "cookie-session": "^2.0.0-alpha.1",
+        "ejs": "^2.5.2",
+        "express": "^4.14.0",
+        "mongoose": "^4.3.4",
+        "passport": "^0.3.2",
+        "passport-local": "^1.0.0",
+        "signalrjs": "^0.2.2",
+        "sugar": "^2.0.4",
+        "q": "^1.4.1"
+    }
 }

@@ -16,20 +16,194 @@
 	</nav>
 
 	<div class="container">
-
 		<!-- Jumbotron Header -->
 		<header class="jumbotron hero-spacer">
 			<h1>All steps are taken</h1>
   			<p>Manage all steps of the man aka Falastrao!</p> 
 		</header>
-		<% if (models.user !=null){ %>
-		<hr>
+		<% if (models.user !=null){ %>		
 		<% include ./partials/events %>
+        <div class="row">
+            <div class="col-sm-12 col-md-6 col-lg-6">
+                <canvas id="canvasLines"></canvas>
+            </div>
+            <div class="col-sm-12 col-md-6 col-lg-6">
+                <canvas id="canvasRadar"></canvas>
+            </div>
+        </div>
 		<% } %>
 	</div>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+	
+	<script src="/scripts/vendor/signalr/jquery.signalR.js"></script>
+    <script src="/scripts/vendor/kriskowal/q.js"></script>    
+	<script src="/scripts/vendor/chartjs/Chart.bundle.js"></script>
+	<script type="text/javascript">
+
+        function makeDatasetsLine(json){
+            var datasets = [];
+
+            for(var key in json.data){
+                var itens = json.data[key];
+                var data = Array(24).fill(0);
+                for(var i in itens){                    
+                    data[itens[i].hour] = itens[i].count
+                }
+                data = data.slice(json.others.hours.min,json.others.hours.max+1);
+
+                var eventButton = $("[data-event='"+key+"']");
+                console.log(eventButton);
+                if(eventButton.length>0){                    
+                    datasets.push(
+                        {
+                            label: key,
+                            backgroundColor: eventButton.data().graphicColor,
+                            borderColor: eventButton.data().graphicColor,
+                            data: data,
+                            fill: false,
+                        }
+                    );
+                }
+            }
+
+            return datasets;
+        }
+
+        function getConfigLine(labels, datasets){
+            return {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    title:{
+                        display:true,
+                        text:'Events'
+                    },
+                    tooltips: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    scales: {
+                        xAxes: [{
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Hour'
+                            }
+                        }],
+                        yAxes: [{
+                            display: true,
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Value'
+                            }
+                        }]
+                    }
+                }
+            };
+        }
+	    
+        function getGraphicDataLine() {
+            var defer = Q.defer();
+
+            $.ajax({
+                url: "/falastrao/chart/database",
+                method: "GET", 
+                error: function (xhr) {
+                    defer.reject({ json: null, xhr: xhr });                    
+                },
+                success: function (json, textStatus, xhr) {
+                    if(json.error){
+                        defer.reject({ json: json, xhr: xhr });
+                    }else{
+                        delete json.error;
+                        defer.resolve({ json: json, xhr: xhr });
+                    }
+                }
+            });
+            return defer.promise;
+        }
+
+		$(function () {	
+            getGraphicDataLine()
+                .then(function (obj) {
+                    console.log(obj);
+                    var json = obj.json;               
+                    var ctxLines = $("#canvasLines")[0].getContext("2d");
+                    var labels = json.others.hours.range;
+                    window.myLine = new Chart(ctxLines, getConfigLine(labels,makeDatasetsLine(json)));  
+                                              
+                })
+                .catch(function (obj) {
+                    console.log(obj);
+                });
+			
+			connection = $.connection('/signalr');                        	
+            connection.error(function(error){
+                console.log(error);
+            });
+            connection.received(function (args) {	
+				console.log(args)			;
+				if(args.action=="falastrao")
+				{       			
+					$.each(args.events, function(){	
+						var obj = $("[data-event='"+this._id+"']");					
+						$(obj).attr("data-running",this.running.toString());
+						$(obj).prop("data-running",this.running.toString());
+						$(obj).data("running",this.running);
+
+						$(".badge",$(obj).closest(".caption")).html(Math.ceil(this.count));
+					});
+					$("[data-running='idle']").attr("data-running","false");
+					$("[data-running='idle']").prop("data-running","false");
+					$("[data-running='idle']").data("running", false);
+					$("[data-running]").removeAttr('disabled');
+				}		                
+            });
+
+            connection.stateChanged(function (change) {                
+                if (change.newState === $.signalR.connectionState.reconnecting) {
+                    console.log('Re-connecting');
+                }
+                else if (change.newState === $.signalR.connectionState.connected) {
+                    console.log('The server is online');
+                } 
+            });
+
+            connection.reconnected(function() {
+                console.log('Reconnected');
+            });
+
+            connection.disconnected(function() {
+                setTimeout(function() {
+                    connection.start().done(function() {
+                        console.log("connection started!");
+                    });  
+                }, 5000); // Restart connection after 5 seconds.
+            });
+         
+            connection.start().done(function() {
+                console.log("connection started!");
+            });                    
+        });
+
+		$("html").on("click","[data-event]", function(){
+			$(this).attr('disabled','disabled');
+			var dados = $(this).data();
+
+			var start = (dados.running===true? "false":"true");
+
+			$.get("/falastrao/addevent/" + dados.event + "/" + start);
+			//$(".navbar-brand").focus();
+			$(this).blur(); 
+		});
+	</script>
 </body>
 
 </html>

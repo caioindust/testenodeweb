@@ -76,6 +76,16 @@ var listen = server.listen(process.env.PORT || 18889, function() {
 
 signalR.on('CONNECTED', function() {
     console.log('connected');
+    var falastraoEvent = new falastraoEventsDB({});
+    falastraoEvent.getLastStatusEvents(
+        function(err, result) {
+            if (err) {
+
+            } else {
+                signalR.broadcast({ "action": "falastrao", "events": result });
+            }
+        }
+    );
 });
 
 process.on('uncaughtException', function(err) {
