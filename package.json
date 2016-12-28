@@ -4,7 +4,6 @@
     "description": "Teste com signalR",
     "main": "server.js",
     "scripts": {
-        "test": "gulp test",
         "start": "node server.js"
     },
     "engines": {
