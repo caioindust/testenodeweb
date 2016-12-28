@@ -10,7 +10,14 @@ var FalastraoEventsSchema = new mongoose.Schema({
 
 FalastraoEventsSchema.methods.getLastStatusEvents = function(callBack) {
     this.model('FalastraoEvents').aggregate(
-        [
+        [{
+                $match: {
+                    date: {
+                        $gte: new Date(new Date().toJSON().slice(0, 10) + "T00:00:00.0Z"),
+                        $lt: new Date(new Date().toJSON().slice(0, 10) + "T23:59:59.0Z")
+                    }
+                }
+            },
             { $sort: { event: 1, date: 1 } },
             {
                 $group: {
@@ -28,15 +35,14 @@ FalastraoEventsSchema.methods.getLastStatusEvents = function(callBack) {
 
 FalastraoEventsSchema.statics.getChartData = function(callBack) {
     return this.model('FalastraoEvents').aggregate(
-        [
-            /*{
-                            $match: {
-                                date: {
-                                    $gte: new Date(new Date().toJSON().slice(0, 10) + "T00:00:00.0Z"),
-                                    $lt: new Date(new Date().toJSON().slice(0, 10) + "T23:59:59.0Z")
-                                }
-                            }
-                        },*/
+        [{
+                $match: {
+                    date: {
+                        $gte: new Date(new Date().toJSON().slice(0, 10) + "T00:00:00.0Z"),
+                        $lt: new Date(new Date().toJSON().slice(0, 10) + "T23:59:59.0Z")
+                    }
+                }
+            },
             {
                 $project: {
                     dateLocal: {
