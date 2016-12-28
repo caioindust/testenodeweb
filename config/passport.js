@@ -41,15 +41,18 @@ module.exports = function(passport) {
             process.nextTick(function() {
                 User.findOne({ 'username': username }, function(err, user) {
                     // if there are any errors, return the error
-                    if (err)
+                    if (err) {
                         return done(err);
+                    }
 
-                    if (!user && !user.validPassword(password))
-                        return done(null, false, req.flash('loginMessage', 'Oops! Something wrong.'));
+                    if (user == null || user.validPassword(password) == false) {
+                        return done(null, false, req.flash('loginMessage', 'User or password is invalid!'));
+                    }
 
                     // all is well, return user
-                    else
+                    else {
                         return done(null, user);
+                    }
                 });
             });
 
