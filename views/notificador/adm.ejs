@@ -20,22 +20,20 @@
 	icons.push({"value" : "ufo" , "src" : ufo_icon, "text" : "UFO"});
 	icons.push({"value" : "yellow" , "src" : yellow_icon, "text" : "Yellow"});
 
-
-  
-	//var api = 'http://micro_sistema68:8089/';
-	var api = location.origin+'/';
-
-function formatState (state) {
-
-	if (!state.id) { return state.text; }
 	
-	var objElement = $(state.element).data().element;
-	
-	var $state = $(
-		'<span ><img src="'+objElement.src+'" class="img-flag" style="widht: 16px; height: 16px;" /> ' + state.text + '</span>'
-	);
-	return $state;
-};
+	var api = location.origin+'/notificador/';
+
+	function formatState (state) {
+
+		if (!state.id) { return state.text; }
+		
+		var objElement = $(state.element).data().element;
+		
+		var $state = $(
+			'<span ><img src="'+objElement.src+'" class="img-flag" style="widht: 16px; height: 16px;" /> ' + state.text + '</span>'
+		);
+		return $state;
+	};
   
 	//http://micro_sistema68:8089/notify?title=Caio&content=Teste%20do%20Caio
 	$(document).ready(function(){
@@ -49,8 +47,6 @@ function formatState (state) {
 			});
 			opt.appendTo(selectIcon);
 		});
-		
-		
 
 		$("#icon").select2({			
 		  templateResult: formatState,
@@ -86,10 +82,6 @@ function formatState (state) {
 			$('.form-group').find('textarea').val('');
 			
 		});
-
-		/*$(".btn-logout").click(function(){
-			location.href = location.origin.replace(/(http:\/\/)/ig,"$1logout:logout@")	+'/logout';
-		});*/
 	});
 
 	

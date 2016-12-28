@@ -1,3 +1,4 @@
+///https://github.com/scotch-io/easy-node-authentication/blob/master/app/routes.js
 // load all the things we need
 var LocalStrategy = require('passport-local').Strategy;
 
@@ -35,8 +36,7 @@ module.exports = function(passport) {
         },
         function(req, username, password, done) {
             //if (username)
-            //    username = username.toLowerCase(); // Use lower-case e-mails to avoid case-sensitive e-mail matching
-
+            //    username = username.toLowerCase(); // Use lower-case e-mails to avoid case-sensitive e-mail matching            
             // asynchronous
             process.nextTick(function() {
                 User.findOne({ 'username': username }, function(err, user) {
