@@ -41,9 +41,10 @@ module.exports = function(passport) {
             process.nextTick(function() {
                 User.findOne({ 'username': username }, function(err, user) {
                     // if there are any errors, return the error
-                    if (err)
+                    if (err) {
                         return done(err);
-                    console.log(password);
+                    }
+
                     if (user == null || user.validPassword(password) == false) {
                         return done(null, false, req.flash('loginMessage', 'User or password is invalid!'));
                     }
