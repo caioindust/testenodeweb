@@ -67,7 +67,9 @@ server.use(passport.session()); // persistent login sessions
 server.use(flash()); // use connect-flash for flash messages stored in session
 server.set('view engine', 'ejs'); // set up ejs for templating
 
-require('./config/routes.js')(server, express, signalR, passport, __dirname);
+require('./config/routesStatics.js')(server, express, signalR, passport, __dirname);
+require('./config/routesNotificador.js')(server, express, signalR, passport, __dirname);
+require('./config/routesFalastrao.js')(server, express, signalR, passport, __dirname);
 
 var listen = server.listen(process.env.PORT || 18889, function() {
     var port = listen.address().port;
