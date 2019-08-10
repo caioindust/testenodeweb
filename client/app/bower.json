@@ -1,0 +1,23 @@
+{
+  "name": "signalr_server",
+  "description": "Teste com signalR",
+  "main": "main.js",
+  "authors": [
+    "Caio Humberto"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "signalR"
+  ],
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "signalr": "~2.2.0"
+  }
+}

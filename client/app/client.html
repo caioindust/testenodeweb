@@ -1,0 +1,74 @@
+﻿<!DOCTYPE html>
+<html xmlns="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <script>window.$ = window.jQuery = require('./bower_components/jquery/dist/jquery.js');</script>
+    <!-- <script src="bower_components/jquery/dist/jquery.js" type="text/javascript"></script>  -->
+    <script src="./bower_components/signalr/jquery.signalR.js" type="text/javascript"></script>
+    <script type="text/javascript">
+        
+        const {ipcRenderer} = require('electron');
+        var connection = null;
+
+        ipcRenderer.on('asynchronous-stateChanged-reply', (event, arg) => {
+            console.log(arg);
+        });
+
+        ipcRenderer.on('asynchronous-notify-reply', (event, arg) => {
+            console.log(arg);
+        });
+            
+        $(function () {	
+			//connection = $.connection('http://micro_sistema68:8089/signalr');
+            connection = $.connection('https://triggerpanelnotify.herokuapp.com/signalr');
+            	
+            connection.error(function(error){
+                console.log(error);
+            });
+            connection.received(function (args) {
+				console.log(args);
+				
+				if(args.action=="notify")
+				{                          
+                    ipcRenderer.send('asynchronous-notify', args.notify);				
+				}		                
+            });
+
+            connection.stateChanged(function (change) {
+                ipcRenderer.send('asynchronous-stateChanged', change);
+
+                if (change.newState === $.signalR.connectionState.reconnecting) {
+                    console.log('Re-connecting');
+                }
+                else if (change.newState === $.signalR.connectionState.connected) {
+                    console.log('The server is online');
+                } 
+            });
+
+            connection.reconnected(function() {
+                console.log('Reconnected');
+            });
+
+            connection.disconnected(function() {
+                setTimeout(function() {
+                    connection.start().done(function() {
+                        console.log("connection started!");
+                    });  
+                }, 5000); // Restart connection after 5 seconds.
+            });
+         
+            connection.start().done(function() {
+                console.log("connection started!");
+            });            
+        
+        });        
+    </script>
+</head>
+
+<body>
+</body>
+
+</html>
