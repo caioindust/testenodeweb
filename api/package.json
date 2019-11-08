@@ -22,7 +22,7 @@
         "cookie-session": "^2.0.0-alpha.1",
         "ejs": "^2.5.2",
         "express": "^4.14.0",
-        "mongoose": "^4.3.4",
+        "mongoose": "^5.7.8",
         "passport": "^0.3.2",
         "passport-local": "^1.0.0",
         "signalrjs": "^0.2.2",
